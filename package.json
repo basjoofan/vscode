@@ -1,0 +1,25 @@
+{
+  "name": "am-vscode",
+  "displayName": "Am Test",
+  "description": "Am Test support for Visual Studio Code.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.68.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "am",
+      "aliases": ["am", "Am"],
+      "extensions": [".am"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "am",
+      "scopeName": "source.am",
+      "path": "./syntaxes/am.tmLanguage.json"
+    }]
+  }
+}
