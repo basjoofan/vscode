@@ -1,4 +1,19 @@
 let s = "string";
+
 fn add(a, b){
     a + b;
+}
+
+#[test, tag]
+rq request`
+    GET http://${host}/get
+    Host: ${host}
+`[status == 200]
+
+let host = "httpbin.org";
+
+#[test, function]
+fn call() {
+    let response = request().response;
+    response.status
 }
