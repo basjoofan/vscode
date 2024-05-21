@@ -64,7 +64,11 @@ export async function activate(context: vscode.ExtensionContext) {
           run.skipped(test);
         } else {
           run.started(test);
-          // TODO await data.run(test, run);
+          // TODO run test use wasm
+          const start = Date.now();
+          await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+          const duration = Date.now() - start;
+          run.passed(test, duration);
         }
         run.appendOutput(`Completed ${test.id}\r\n`);
       }
