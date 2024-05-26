@@ -1,4 +1,5 @@
 let s = "string";
+let host = "httpbin.org";
 
 fn add(a, b){
     a + b;
@@ -9,8 +10,6 @@ rq request`
     GET http://${host}/get
     Host: ${host}
 `[status == 200]
-
-let host = "httpbin.org";
 
 #[test, function]
 fn call() {

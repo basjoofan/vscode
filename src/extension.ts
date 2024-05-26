@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { spawn } from 'child_process';
 
 export async function activate(context: vscode.ExtensionContext) {
   const ctrl = vscode.tests.createTestController('AmTestController', 'Am Test');
@@ -59,16 +60,31 @@ export async function activate(context: vscode.ExtensionContext) {
     };
     const runTestQueue = async () => {
       for (const test of queue) {
-        run.appendOutput(`Running ${test.id}\r\n`);
+        run.appendOutput(`Running ${test.uri} ${test.label}\r\n`);
         if (run.token.isCancellationRequested) {
           run.skipped(test);
         } else {
           run.started(test);
-          // TODO run test use wasm
           const start = Date.now();
-          await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+          const result = await new Promise<boolean>(resolve => {
+            const child = spawn("am", ["call", test.label], { cwd: vscode.workspace.rootPath });
+            child.stdout.on("data", data => {
+              run.appendOutput(`${data}\r\n`);
+            });
+            child.stderr.on("data", data => {
+              run.appendOutput(`error:${data}\r\n`);
+            });
+            child.on('close', code => {
+              resolve(code === 0);
+            });
+          });
           const duration = Date.now() - start;
-          run.passed(test, duration);
+          if (result) {
+            run.passed(test, duration);
+          } else {
+            // const message = vscode.TestMessage(`Expected ${item.label}`, String(this.expected), String(actual));
+            run.failed(test, new vscode.TestMessage(`failed ${test.label}`), duration);
+          }
         }
         run.appendOutput(`Completed ${test.id}\r\n`);
       }
