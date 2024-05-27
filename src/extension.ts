@@ -68,15 +68,20 @@ export async function activate(context: vscode.ExtensionContext) {
           const start = Date.now();
           const result = await new Promise<boolean>(resolve => {
             const child = spawn("am", ["call", test.label], { cwd: vscode.workspace.rootPath });
-            child.stdout.on("data", data => {
-              run.appendOutput(`${data}\r\n`);
-            });
-            child.stderr.on("data", data => {
-              run.appendOutput(`error:${data}\r\n`);
-            });
-            child.on('close', code => {
-              resolve(code === 0);
-            });
+            if (child.pid) {
+              child.stdout.on("data", data => {
+                run.appendOutput(`${data}\r\n`);
+              });
+              child.stderr.on("data", data => {
+                run.appendOutput(`error:${data}\r\n`);
+              });
+              child.on('close', code => {
+                resolve(code === 0);
+              });
+            } else {
+              run.appendOutput(`Command am execution failed, please check am is installed.\r\n`);
+              resolve(false);
+            }
           });
           const duration = Date.now() - start;
           if (result) {
