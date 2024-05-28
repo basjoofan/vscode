@@ -136,7 +136,6 @@ async function parseTestsInFileContents(controller: vscode.TestController, file:
     const rawContent = await vscode.workspace.fs.readFile(file.uri!);
     content = new TextDecoder().decode(rawContent);
   }
-  vscode.window.showInformationMessage(content);
   // parse test case to fill in test.children from the content...
   const children = [] as vscode.TestItem[];
   const lines = content.split('\n');
