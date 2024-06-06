@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { spawn } from 'child_process';
+import { sep } from 'path';
 
 export async function activate(context: vscode.ExtensionContext) {
   const ctrl = vscode.tests.createTestController('AmTestController', 'Am Test');
@@ -58,6 +59,17 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       }
     };
+    
+    const appendOutput = (chunk: string) => {
+      for (; ;) {
+        const index = chunk.indexOf('\n');
+        if (index === -1) break;
+        const line = chunk.substring(0, index);
+        chunk = chunk.substring(index + 1);
+        run.appendOutput(`${line}\r\n`);
+      }
+    };
+
     const runTestQueue = async () => {
       for (const test of queue) {
         run.appendOutput(`Running ${test.uri} ${test.label}\r\n`);
@@ -67,16 +79,25 @@ export async function activate(context: vscode.ExtensionContext) {
           run.started(test);
           const start = Date.now();
           const result = await new Promise<boolean>(resolve => {
-            const child = spawn("am", ["call", test.label], { cwd: vscode.workspace.rootPath });
+            const child = spawn('am', ['blow', test.label], { cwd: getWorkspacePath(test.uri) });
             if (child.pid) {
-              child.stdout.on("data", data => {
-                run.appendOutput(`${data}\r\n`);
+              let buffer = '';
+              child.stdout.on('data', data => {
+                const chunk = data.toString();
+                appendOutput(chunk);
+                buffer += chunk;
               });
-              child.stderr.on("data", data => {
-                run.appendOutput(`error:${data}\r\n`);
+              child.stderr.on('data', data => {
+                const chunk = data.toString();
+                appendOutput(chunk);
+                buffer += chunk;
               });
               child.on('close', code => {
-                resolve(code === 0);
+                if (!buffer.match(/.*FAIL.*/) && code === 0) {
+                  resolve(true);
+                } else {
+                  resolve(false);
+                }
               });
             } else {
               run.appendOutput(`Command am execution failed, please check am is installed.\r\n`);
@@ -141,10 +162,10 @@ async function parseTestsInFileContents(controller: vscode.TestController, file:
   const lines = content.split('\n');
   for (let number = 0; number < lines.length; number++) {
     const current = lines[number].trim();
-    const previous = number >= 1 ? lines[number - 1].trim() : "";
-    if ((current.startsWith("rq") || current.startsWith("fn")) && (previous.startsWith("#[") && previous.endsWith("]"))) {
+    const previous = number >= 1 ? lines[number - 1].trim() : '';
+    if ((current.startsWith('rq') || current.startsWith('fn')) && (previous.startsWith('#[') && previous.endsWith(']'))) {
       const range = new vscode.Range(new vscode.Position(number, 0), new vscode.Position(number, current.length));
-      const label = current.substring(2, current.startsWith("rq") ? current.indexOf("`") : current.indexOf("(")).trim();
+      const label = current.substring(2, current.startsWith('rq') ? current.indexOf('`') : current.indexOf('(')).trim();
       const id = `${file.uri}/${label}`;
       const item = controller.createTestItem(id, label, file.uri);
       item.range = range;
@@ -207,4 +228,15 @@ function startWatchingWorkspace(controller: vscode.TestController, fileChangedEm
 
     return watcher;
   });
+}
+
+function getWorkspacePath(uri: vscode.Uri | undefined) {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (workspaceFolders && uri) {
+    for (const workspaceFolder of workspaceFolders) {
+      if (uri.fsPath.startsWith(workspaceFolder.uri.fsPath + sep)) {
+        return workspaceFolder.uri.fsPath;
+      }
+    }
+  }
 }
