@@ -5,6 +5,7 @@
   "version": "0.0.1",
   "publisher": "basjoofan",
   "private": true,
+  "icon": "icon.png",
   "license": "MIT",
   "repository": "https://github.com/basjoofan/am",
   "engines": {
@@ -58,22 +59,6 @@
         "language": "am",
         "scopeName": "source.am",
         "path": "./syntaxes/am.tmLanguage.json"
-      }
-    ],
-    "commands": [
-      {
-        "command": "am.call.cursor",
-        "title": "Am: Test Request At Cursor",
-        "description": "Runs a unit test at the cursor."
-      }
-    ]
-  },
-  "menus": {
-    "editor/context": [
-      {
-        "when": "resourceLangId == am",
-        "command": "am.call.cursor",
-        "group": "Am group 1"
       }
     ]
   }
