@@ -27,13 +27,15 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "lint": "eslint \"src/**/*.ts\"",
-    "watch": "tsc -watch -p ./"
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
   },
   "devDependencies": {
     "@types/node": "^18",
-    "@types/vscode": "^1.88.0",
+    "@types/vscode": "^1.68.0",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
+    "@vscode/vsce": "^2.27.0",
     "eslint": "^8.26.0",
     "typescript": "^5.4.2"
   },
