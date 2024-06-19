@@ -5,7 +5,7 @@
   "version": "0.0.1",
   "publisher": "basjoofan",
   "private": true,
-  "icon": "icons/icon.png",
+  "icon": "icons/am.png",
   "license": "MIT",
   "repository": "https://github.com/basjoofan/am",
   "engines": {
