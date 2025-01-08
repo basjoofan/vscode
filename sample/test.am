@@ -5,14 +5,6 @@ fn add(a, b){
     a + b;
 }
 
-#[test, tag]
-rq request`
-    GET http://${host}/get
-    Host: ${host}
-`[status == 200]
-
-#[test, function]
-fn call() {
-    let response = request().response;
-    response.status
+test case {
+    add(1, 1);
 }

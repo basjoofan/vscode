@@ -1,8 +1,45 @@
 import * as vscode from 'vscode';
 import { spawn } from 'child_process';
 import { sep } from 'path';
+import { WasmContext, Memory } from '@vscode/wasm-component-model';
+import { lib } from './lib';
 
 export async function activate(context: vscode.ExtensionContext) {
+  // The channel for printing the log.
+  const log = vscode.window.createOutputChannel('Am - Log', { log: true });
+  context.subscriptions.push(log);
+
+  // Load the Wasm module
+  const filename = vscode.Uri.joinPath(context.extensionUri, 'target', 'wasm32-unknown-unknown', 'debug', 'lib.wasm');
+  const bits = await vscode.workspace.fs.readFile(filename);
+  const module = await WebAssembly.compile(bits);
+
+  // The implementation of the log function that is called from WASM
+  const service: lib.Imports = {
+    log: (msg: string) => {
+      log.info(msg);
+    }
+  };
+
+  // The context for the WASM module
+  const wasmContext: WasmContext.Default = new WasmContext.Default();
+
+  // Create the bindings to import the log function into the WASM module
+  const imports = lib._.imports.create(service, wasmContext);
+  // Instantiate the module
+  const instance = await WebAssembly.instantiate(module, imports);
+
+  // Bind the WASM memory to the context
+  wasmContext.initialize(new Memory.Default(instance.exports));
+
+  // Bind the TypeScript Api
+  const api = lib._.exports.bind(instance.exports as lib._.Exports, wasmContext);
+  const results = api.run('case');
+  for (let i = 0; i < results.length; i++) {
+    log.info(results[i]);
+    log.info(`results[${i}]: ${results[i]}`);
+  }
+
   const ctrl = vscode.tests.createTestController('AmTestController', 'Am Test');
   context.subscriptions.push(ctrl);
 
@@ -59,7 +96,7 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       }
     };
-    
+
     const appendOutput = (chunk: string) => {
       for (; ;) {
         const index = chunk.indexOf('\n');
@@ -79,30 +116,31 @@ export async function activate(context: vscode.ExtensionContext) {
           run.started(test);
           const start = Date.now();
           const result = await new Promise<boolean>(resolve => {
-            const child = spawn('am', ['blow', test.label], { cwd: getWorkspacePath(test.uri) });
-            if (child.pid) {
-              let buffer = '';
-              child.stdout.on('data', data => {
-                const chunk = data.toString();
-                appendOutput(chunk);
-                buffer += chunk;
-              });
-              child.stderr.on('data', data => {
-                const chunk = data.toString();
-                appendOutput(chunk);
-                buffer += chunk;
-              });
-              child.on('close', code => {
-                if (!buffer.match(/.*FAIL.*/) && code === 0) {
-                  resolve(true);
-                } else {
-                  resolve(false);
-                }
-              });
-            } else {
-              run.appendOutput(`Command am execution failed, please check am is installed.\r\n`);
-              resolve(false);
-            }
+            api.run(getWorkspacePath(test.uri)!);
+            // const child = spawn('am', ['blow', test.label], { cwd: getWorkspacePath(test.uri) });
+            // if (child.pid) {
+            //   let buffer = '';
+            //   child.stdout.on('data', data => {
+            //     const chunk = data.toString();
+            //     appendOutput(chunk);
+            //     buffer += chunk;
+            //   });
+            //   child.stderr.on('data', data => {
+            //     const chunk = data.toString();
+            //     appendOutput(chunk);
+            //     buffer += chunk;
+            //   });
+            //   child.on('close', code => {
+            //     if (!buffer.match(/.*FAIL.*/) && code === 0) {
+            //       resolve(true);
+            //     } else {
+            //       resolve(false);
+            //     }
+            //   });
+            // } else {
+            //   run.appendOutput(`Command am execution failed, please check am is installed.\r\n`);
+            //   resolve(false);
+            // }
           });
           const duration = Date.now() - start;
           if (result) {
@@ -162,10 +200,9 @@ async function parseTestsInFileContents(controller: vscode.TestController, file:
   const lines = content.split('\n');
   for (let number = 0; number < lines.length; number++) {
     const current = lines[number].trim();
-    const previous = number >= 1 ? lines[number - 1].trim() : '';
-    if ((current.startsWith('rq') || current.startsWith('fn')) && (previous.startsWith('#[') && previous.endsWith(']'))) {
+    if (current.startsWith('test') && current.endsWith('{')) {
       const range = new vscode.Range(new vscode.Position(number, 0), new vscode.Position(number, current.length));
-      const label = current.substring(2, current.startsWith('rq') ? current.indexOf('`') : current.indexOf('(')).trim();
+      const label = current.substring(4, current.length - 2).trim();
       const id = `${file.uri}/${label}`;
       const item = controller.createTestItem(id, label, file.uri);
       item.range = range;
@@ -230,7 +267,7 @@ function startWatchingWorkspace(controller: vscode.TestController, fileChangedEm
   });
 }
 
-function getWorkspacePath(uri: vscode.Uri | undefined) {
+function getWorkspacePath(uri: vscode.Uri | undefined): string | undefined {
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (workspaceFolders && uri) {
     for (const workspaceFolder of workspaceFolders) {
@@ -239,4 +276,5 @@ function getWorkspacePath(uri: vscode.Uri | undefined) {
       }
     }
   }
+  return undefined;
 }
