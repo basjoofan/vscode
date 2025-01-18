@@ -1,6 +1,2 @@
 let s = "string";
 let host = "httpbin.org";
-
-test case {
-    1 + 1;
-}

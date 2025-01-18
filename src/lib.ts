@@ -17,7 +17,7 @@ export namespace lib {
 		export type Promisify<T> = $wcm.$imports.Promisify<T>;
 	}
 	export type Exports = {
-		run: (path: string) => string[];
+		run: (text: string) => string[];
 	};
 	export namespace Exports {
 		export type Promisified = $wcm.$exports.Promisify<Exports>;
@@ -35,7 +35,7 @@ export namespace lib.$ {
 	}
 	export namespace exports {
 		export const run = new $wcm.FunctionType<lib.Exports['run']>('run',[
-			['path', $wcm.wstring],
+			['text', $wcm.wstring],
 		], new $wcm.ListType<string>($wcm.wstring));
 	}
 }
@@ -68,7 +68,7 @@ export namespace lib._ {
 		}
 	}
 	export type Exports = {
-		'run': (path_ptr: i32, path_len: i32, result: ptr<string[]>) => void;
+		'run': (text_ptr: i32, text_len: i32, result: ptr<string[]>) => void;
 	};
 	export function bind(service: lib.Imports, code: $wcm.Code, context?: $wcm.ComponentModelContext): Promise<lib.Exports>;
 	export function bind(service: lib.Imports.Promisified, code: $wcm.Code, port: $wcm.RAL.ConnectionPort, context?: $wcm.ComponentModelContext): Promise<lib.Exports.Promisified>;

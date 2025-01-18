@@ -3,5 +3,5 @@ package vscode:am;
 
 world lib {
 	import log: func(msg: string);
-	export run: func(path: string) -> list<string>;
+	export run: func(text: string) -> list<string>;
 }

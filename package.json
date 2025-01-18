@@ -24,26 +24,32 @@
     "workspaceContains:*.am"
   ],
   "main": "out/extension.js",
+  "browser": "./dist/web/extension",
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "build": "npm run compile && cargo build --target wasm32-unknown-unknown",
     "compile": "tsc -p ./",
     "lint": "eslint \"src/**/*.ts\"",
     "watch": "tsc -watch -p ./",
+    "esbuild": "node ./bin/esbuild.js",
     "generate:model": "wit2ts --outDir ./src ./wit",
-    "package": "vsce package"
+    "package": "vsce package",
+    "serve": "serve --cors -l 5555 --ssl-cert $HOME/certs/localhost.pem --ssl-key $HOME/certs/localhost-key.pem"
   },
   "dependencies": {
     "@vscode/wasm-component-model": "1.0.1"
   },
   "devDependencies": {
-    "@types/node": "^22",
-    "@types/vscode": "^1.96.0",
-    "@typescript-eslint/eslint-plugin": "^8.19.1",
-    "@typescript-eslint/parser": "^8.19.1",
+		"@eslint/js": "^9.18.0",
+		"@stylistic/eslint-plugin": "^2.13.0",
+		"@types/node": "^22",
+		"@types/vscode": "1.96.0",
     "@vscode/vsce": "^3.2.1",
-    "eslint": "^9.17.0",
-    "typescript": "^5.7.2"
+		"esbuild": "^0.24.2",
+		"eslint": "^9.18.0",
+		"serve": "^14.2.1",
+		"typescript": "^5.7.3",
+		"typescript-eslint": "^8.20.0"
   },
   "contributes": {
     "languages": [

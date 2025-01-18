@@ -11,10 +11,9 @@ use am::Source;
 struct Lib;
 
 impl Guest for Lib {
-    fn run(path: String) -> Vec<String> {
-        log(&format!("Starting run: {:?}", path));
+    fn run(text: String) -> Vec<String> {
         let mut results = Vec::new();
-        match Parser::new("1 + 1").parse() {
+        match Parser::new(&text).parse() {
             Ok(Source { exprs, .. }) => {
                 for expr in exprs {
                     results.push(expr.to_string());
