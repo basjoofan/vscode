@@ -1,32 +1,41 @@
 import * as vscode from 'vscode';
-import { WasmContext, Memory } from '@vscode/wasm-component-model';
 import { lib } from './lib';
-export async function activate(context: vscode.ExtensionContext) {
+import { Worker } from 'worker_threads';
+
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
   // The channel for printing the log.
   const log = vscode.window.createOutputChannel('Am - Log', { log: true });
   context.subscriptions.push(log);
-
+  // The implementation of the log function that is called from WASM
+  const service: lib.Imports.Promisified = {
+    log: (msg: string) => {
+      log.info(msg);
+    },
+    get: (url: string) => fetch(url).then((res) => {
+      return res.text();
+    }),
+  };
   // Load the Wasm module
   const filename = vscode.Uri.joinPath(context.extensionUri, 'target', 'wasm32-unknown-unknown', 'debug', 'lib.wasm');
   const bits = await vscode.workspace.fs.readFile(filename);
   const module = await WebAssembly.compile(bits);
-  // The implementation of the log function that is called from WASM
-  const service: lib.Imports = {
-    log: (msg: string) => {
-      log.info(msg);
-    },
-  };
+  const worker = new Worker(vscode.Uri.joinPath(context.extensionUri, './out/worker.js').fsPath);
+  const api = await lib._.bind(service, module, worker);
 
-  // The context for the WASM module
-  const wasmContext: WasmContext.Default = new WasmContext.Default();
-  // Create the bindings to import the log function into the WASM module
-  const imports = lib._.imports.create(service, wasmContext);
-  // Instantiate the module
-  const instance = await WebAssembly.instantiate(module, imports);
-  // Bind the WASM memory to the context
-  wasmContext.initialize(new Memory.Default(instance.exports));
-  // Bind the TypeScript Api
-  const api = lib._.exports.bind(instance.exports as lib._.Exports, wasmContext);
+  // // The context for the WASM module
+  // const wasmContext: WasmContext.Default = new WasmContext.Default();
+  // // Create the bindings to import the log function into the WASM module
+  // const imports = lib._.imports.create(service, wasmContext);
+  // // Instantiate the module
+  // const instance = await WebAssembly.instantiate(module, imports);
+  // // Bind the WASM memory to the context
+  // wasmContext.initialize(new Memory.Default(instance.exports));
+  // // Bind the TypeScript Api
+  // const api = lib._.exports.bind(instance.exports as lib._.Exports, wasmContext);
+
+  const text = await service.get("https://httpbin.org/get");
+  log.info(`text: ${text}`);
+  await api.run("1+1");
 
   const ctrl = vscode.tests.createTestController('AmTestController', 'Am Test');
   context.subscriptions.push(ctrl);
@@ -105,11 +114,12 @@ export async function activate(context: vscode.ExtensionContext) {
           const start = Date.now();
           const result = await new Promise<boolean>(async resolve => {
             const text = await readWorkspaceText();
-            const results = api.run(text);
-            for (let i = 0; i < results.length; i++) {
-              log.info(`results[${i}]: ${results[i]}`);
-              run.appendOutput(`results[${i}]: ${results[i]}\r\n`);
-            }
+            run.appendOutput(`text:${text}`);
+            // const results = await api.run(text);
+            // for (let i = 0; i < results.length; i++) {
+            //   log.info(`results[${i}]: ${results[i]}`);
+            //   run.appendOutput(`results[${i}]: ${results[i]}\r\n`);
+            // }
             // api.run(getWorkspacePath(test.uri)!);
             // const child = spawn('am', ['blow', test.label], { cwd: getWorkspacePath(test.uri) });
             // if (child.pid) {

@@ -9,6 +9,7 @@ import type { i32, ptr } from '@vscode/wasm-component-model';
 export namespace lib {
 	export type Imports = {
 		log: (msg: string) => void;
+		get: (url: string) => string;
 	};
 	export namespace Imports {
 		export type Promisified = $wcm.$imports.Promisify<Imports>;
@@ -32,6 +33,9 @@ export namespace lib.$ {
 		export const log = new $wcm.FunctionType<lib.Imports['log']>('log',[
 			['msg', $wcm.wstring],
 		], undefined);
+		export const get = new $wcm.FunctionType<lib.Imports['get']>('get',[
+			['url', $wcm.wstring],
+		], $wcm.wstring);
 	}
 	export namespace exports {
 		export const run = new $wcm.FunctionType<lib.Exports['run']>('run',[
@@ -44,10 +48,12 @@ export namespace lib._ {
 	export const witName = 'lib' as const;
 	export type $Root = {
 		'log': (msg_ptr: i32, msg_len: i32) => void;
+		'get': (url_ptr: i32, url_len: i32, result: ptr<string>) => void;
 	};
 	export namespace imports {
 		export const functions: Map<string, $wcm.FunctionType> = new Map([
-			['log', $.imports.log]
+			['log', $.imports.log],
+			['get', $.imports.get]
 		]);
 		export function create(service: lib.Imports, context: $wcm.WasmContext): Imports {
 			return $wcm.$imports.create<Imports>(_, service, context);

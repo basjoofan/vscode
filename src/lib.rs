@@ -12,6 +12,7 @@ struct Lib;
 
 impl Guest for Lib {
     fn run(text: String) -> Vec<String> {
+        log(&format!("!text: {}", get("https://httpbin.org/get")));
         let mut results = Vec::new();
         match Parser::new(&text).parse() {
             Ok(Source { exprs, .. }) => {
@@ -21,6 +22,7 @@ impl Guest for Lib {
             }
             Err(error) => log(&format!("error: {}", error)),
         }
+        log(&format!("!results: {:?}", results));
         results
     }
 }

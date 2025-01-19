@@ -3,5 +3,6 @@ package vscode:am;
 
 world lib {
 	import log: func(msg: string);
+	import get: func(url: string) -> string;
 	export run: func(text: string) -> list<string>;
 }
