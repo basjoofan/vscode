@@ -26,13 +26,13 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: am vscode ${{ env.version }}
-          path: am-*.vsix
+          name: basjoofan vscode ${{ env.version }}
+          path: basjoofan-*.vsix
       - name: Release Version
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: am-*.vsix
+          files: basjoofan-*.vsix
           draft: true

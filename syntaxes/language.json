@@ -1,6 +1,6 @@
 {
-  "name": "Am",
-  "scopeName": "source.am",
+  "name": "Basjoofan",
+  "scopeName": "source",
   "patterns": [
     {
       "include": "#keywords"
@@ -22,13 +22,13 @@
     "keywords": {
       "patterns": [
         {
-          "name": "keyword.control.am",
+          "name": "keyword.control",
           "match": "\\b(fn|rq|let|if|else|return|while|for)\\b"
         }
       ]
     },
     "strings": {
-      "name": "string.literal.am",
+      "name": "string.literal",
       "begin": "\"",
       "end": "\"",
       "patterns": [
@@ -41,7 +41,7 @@
       ]
     },
     "templates": {
-      "name": "string.template.am",
+      "name": "string.template",
       "begin": "`",
       "end": "`",
       "patterns": [
@@ -54,11 +54,11 @@
       "patterns": [
         {
           "match": "\\\\([0-7]{3}|[abfnrtv\\\\'\"]|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8})",
-          "name": "constant.character.escape.am"
+          "name": "constant.character.escape"
         },
         {
           "match": "\\\\[^0-7xuUabfnrtv\\'\"]",
-          "name": "invalid.illegal.unknown-escape.am"
+          "name": "invalid.illegal.unknown-escape"
         }
       ]
     },
@@ -66,7 +66,7 @@
       "patterns": [
         {
           "match": "%(\\[\\d+\\])?([\\+#\\-0\\x20]{,2}((\\d+|\\*)?(\\.?(\\d+|\\*|(\\[\\d+\\])\\*?)?(\\[\\d+\\])?)?))?[vT%tbcdoqxXUbeEfFgGspw]",
-          "name": "constant.other.placeholder.am"
+          "name": "constant.other.placeholder"
         }
       ]
     },
@@ -74,7 +74,7 @@
       "patterns": [
         {
           "comment": "variables",
-          "name": "variable.other.am",
+          "name": "variable.other",
           "match": "\\w+"
         }
       ]

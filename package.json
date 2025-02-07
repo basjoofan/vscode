@@ -1,18 +1,18 @@
 {
-  "name": "am",
-  "displayName": "Am Test",
-  "description": "Am Test support for Visual Studio Code.",
-  "version": "0.0.1",
+  "name": "basjoofan",
+  "displayName": "Basjoofan",
+  "description": "Basjoofan support for Visual Studio Code.",
+  "version": "0.0.2",
   "publisher": "basjoofan",
   "private": true,
-  "icon": "icons/am.png",
-  "license": "MIT",
-  "repository": "https://github.com/basjoofan/am",
+  "icon": "icons/icon.png",
+  "license": "MIT OR Apache-2.0",
+  "repository": "https://github.com/basjoofan/vscode",
   "engines": {
     "vscode": "^1.68.0"
   },
   "keywords": [
-    "am",
+    "basjoofan",
     "test"
   ],
   "categories": [
@@ -21,7 +21,7 @@
     "Snippets"
   ],
   "activationEvents": [
-    "workspaceContains:*.am"
+    "workspaceContains:*.fan"
   ],
   "main": "out/extension.js",
   "scripts": {
@@ -32,24 +32,24 @@
     "package": "vsce package"
   },
   "devDependencies": {
-    "@types/node": "^18",
-    "@types/vscode": "^1.68.0",
-    "@typescript-eslint/eslint-plugin": "^6.7.0",
-    "@typescript-eslint/parser": "^6.7.0",
-    "@vscode/vsce": "^2.27.0",
-    "eslint": "^8.26.0",
-    "typescript": "^5.4.2"
+    "@types/node": "^22",
+    "@types/vscode": "^1.97.0",
+    "@typescript-eslint/eslint-plugin": "^8.23.0",
+    "@typescript-eslint/parser": "8.23.0",
+    "@vscode/vsce": "^3.2.1",
+    "eslint": "^9.20.0",
+    "typescript": "^5.7.3"
   },
   "contributes": {
     "languages": [
       {
-        "id": "am",
+        "id": "basjoofan",
         "aliases": [
-          "Am",
-          "am"
+          "Basjoofan",
+          "basjoofan"
         ],
         "extensions": [
-          ".am"
+          ".fan"
         ],
         "configuration": "language-configuration.json",
         "icon": {
@@ -60,9 +60,9 @@
     ],
     "grammars": [
       {
-        "language": "am",
-        "scopeName": "source.am",
-        "path": "syntaxes/am.tmLanguage.json"
+        "language": "basjoofan",
+        "scopeName": "source",
+        "path": "syntaxes/language.json"
       }
     ]
   }

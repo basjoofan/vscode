@@ -3,7 +3,7 @@ import { spawn } from 'child_process';
 import { sep } from 'path';
 
 export async function activate(context: vscode.ExtensionContext) {
-  const ctrl = vscode.tests.createTestController('AmTestController', 'Am Test');
+  const ctrl = vscode.tests.createTestController('BasjoofanTestController', 'Basjoofan');
   context.subscriptions.push(ctrl);
 
   const fileChangedEmitter = new vscode.EventEmitter<vscode.Uri>();
@@ -59,7 +59,7 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       }
     };
-    
+
     const appendOutput = (chunk: string) => {
       for (; ;) {
         const index = chunk.indexOf('\n');
@@ -79,7 +79,7 @@ export async function activate(context: vscode.ExtensionContext) {
           run.started(test);
           const start = Date.now();
           const result = await new Promise<boolean>(resolve => {
-            const child = spawn('am', ['blow', test.label], { cwd: getWorkspacePath(test.uri) });
+            const child = spawn('basjoofan', ['test', test.label], { cwd: getWorkspacePath(test.uri) });
             if (child.pid) {
               let buffer = '';
               child.stdout.on('data', data => {
@@ -100,7 +100,7 @@ export async function activate(context: vscode.ExtensionContext) {
                 }
               });
             } else {
-              run.appendOutput(`Command am execution failed, please check am is installed.\r\n`);
+              run.appendOutput(`Command basjoofan execution failed, please check basjoofan is installed.\r\n`);
               resolve(false);
             }
           });
@@ -108,7 +108,6 @@ export async function activate(context: vscode.ExtensionContext) {
           if (result) {
             run.passed(test, duration);
           } else {
-            // const message = vscode.TestMessage(`Expected ${item.label}`, String(this.expected), String(actual));
             run.failed(test, new vscode.TestMessage(`failed ${test.label}`), duration);
           }
         }
@@ -134,7 +133,7 @@ export async function activate(context: vscode.ExtensionContext) {
   };
 
   function parseTestsInDocument(e: vscode.TextDocument) {
-    if (e.uri.scheme === 'file' && e.uri.path.endsWith('.am')) {
+    if (e.uri.scheme === 'file' && e.uri.path.endsWith('.fan')) {
       parseTestsInFileContents(ctrl, getOrCreateFile(ctrl, e.uri), e.getText());
     }
   }
@@ -162,10 +161,9 @@ async function parseTestsInFileContents(controller: vscode.TestController, file:
   const lines = content.split('\n');
   for (let number = 0; number < lines.length; number++) {
     const current = lines[number].trim();
-    const previous = number >= 1 ? lines[number - 1].trim() : '';
-    if ((current.startsWith('rq') || current.startsWith('fn')) && (previous.startsWith('#[') && previous.endsWith(']'))) {
+    if (current.startsWith('test') && current.endsWith('{')) {
       const range = new vscode.Range(new vscode.Position(number, 0), new vscode.Position(number, current.length));
-      const label = current.substring(2, current.startsWith('rq') ? current.indexOf('`') : current.indexOf('(')).trim();
+      const label = current.substring(4, current.length - 2).trim();
       const id = `${file.uri}/${label}`;
       const item = controller.createTestItem(id, label, file.uri);
       item.range = range;
@@ -200,7 +198,7 @@ function getWorkspaceTestPatterns() {
 
   return vscode.workspace.workspaceFolders.map(workspaceFolder => ({
     workspaceFolder,
-    pattern: new vscode.RelativePattern(workspaceFolder, '**/*.am'),
+    pattern: new vscode.RelativePattern(workspaceFolder, '**/*.fan'),
   }));
 }
 
