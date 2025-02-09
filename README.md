@@ -34,4 +34,4 @@ learn how to build and run the VS Code Basjoofan extension locally and contribut
 
 ## License
 
-[MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE)
+[MIT](LICENSE)
