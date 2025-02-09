@@ -28,6 +28,7 @@ jobs:
         with:
           name: basjoofan vscode ${{ env.version }}
           path: basjoofan-*.vsix
+          if-no-files-found: error
       - name: Release Version
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
