@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
 import { spawn } from 'child_process';
 import { sep } from 'path';
+import { _eval } from 'lib';
 
 export async function activate(context: vscode.ExtensionContext) {
+  vscode.window.showInformationMessage(await _eval("1 + 1"));
   const ctrl = vscode.tests.createTestController('BasjoofanTestController', 'Basjoofan');
   context.subscriptions.push(ctrl);
 
