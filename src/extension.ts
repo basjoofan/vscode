@@ -4,6 +4,7 @@ import { sep } from 'path';
 import { _eval } from 'lib';
 
 export async function activate(context: vscode.ExtensionContext) {
+  // global.console = vscode.window.createOutputChannel('Basjoofan');
   vscode.window.showInformationMessage(await _eval("1 + 1"));
   const ctrl = vscode.tests.createTestController('BasjoofanTestController', 'Basjoofan');
   context.subscriptions.push(ctrl);
@@ -160,17 +161,18 @@ async function parseTestsInFileContents(controller: vscode.TestController, file:
   }
   // parse test case to fill in test.children from the content...
   const children = [] as vscode.TestItem[];
-  const lines = content.split('\n');
-  for (let number = 0; number < lines.length; number++) {
-    const current = lines[number].trim();
-    if (current.startsWith('test') && current.endsWith('{')) {
-      const range = new vscode.Range(new vscode.Position(number, 0), new vscode.Position(number, current.length));
-      const label = current.substring(4, current.length - 2).trim();
-      const id = `${file.uri}/${label}`;
-      const item = controller.createTestItem(id, label, file.uri);
-      item.range = range;
-      children.push(item);
-    }
+  const pattern = /test\s+[a-zA-Z_]\w*\s+{/gm;
+  const matches = content.matchAll(pattern);
+  for (const match of matches) {
+    const ahead = content.substring(0, match.index).split('\n').length - 1;
+    const current = match[0].trim();
+    const splits = current.split('\n');
+    const range = new vscode.Range(new vscode.Position(ahead, 0), new vscode.Position(ahead + splits.length - 1, splits.pop()!.length));
+    const label = current.substring(4, current.length - 2).trim();
+    const id = `${file.uri}/${label}`;
+    const item = controller.createTestItem(id, label, file.uri);
+    item.range = range;
+    children.push(item);
   }
   file.children.replace(children);
 }

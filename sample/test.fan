@@ -4,9 +4,11 @@ rq get`
     GET https://{host}/get
     Host: {host}
     Connection: close
-`[status == 200];
+`[status == 201];
 
-test call {
+  test
+ call 
+  {
     let response = get->;
     response.status
 }

@@ -1,7 +1,7 @@
 [package]
-name = "lib-nodejs"
-version = "0.0.1"
-description = "basjoofan library for nodejs"
+name = "lib-vscode"
+version = "0.1.0"
+description = "basjoofan library for vscode"
 repository = "https://github.com/basjoofan/vscode"
 license = "MIT OR Apache-2.0"
 authors = ["Lamb <lamb@basjoofan.com>"]
@@ -16,8 +16,8 @@ target = "wasm32-unknown-unknown"
 
 [dependencies]
 lib = { path = "../core/lib", features = ["wasm"]  }
-wasm-bindgen = "0.2.103"
-wasm-bindgen-futures = "0.4.53"
+wasm-bindgen = "0.2.104"
+wasm-bindgen-futures = "0.4.54"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.54"
