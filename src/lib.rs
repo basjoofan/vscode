@@ -1,37 +1,33 @@
 use lib::Context;
 use lib::Parser;
-use wasm_bindgen::prelude::*;
+use std::fmt::Write;
+use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
-}
-
-#[wasm_bindgen]
-pub fn greet() {
-    alert("Hello, wasm-lib!");
-}
-
-#[wasm_bindgen]
-pub fn add(a: i32, b: i32) -> i32 {
-    a + b
-}
-
-#[wasm_bindgen]
-pub fn process_string(input: &str) -> String {
-    format!("Processed: '{}' (from Rust WASM)", input)
-}
-
-#[wasm_bindgen]
-pub async fn eval(text: String) -> String {
+pub async fn run_test(text: &str, name: &str, base: &str) -> Result<String, String> {
     let mut context = Context::new();
-    match Parser::new(&text).parse() {
+    let source = match Parser::new(&text).parse_with_base(base) {
         Ok(source) => match source.eval_block(&source.exprs, &mut context).await {
-            Ok(value) => {
-                format!("{value}")
-            }
-            Err(error) => format!("{error}"),
+            Ok(_) => source,
+            Err(error) => return Err(error),
         },
-        Err(error) => format!("{error}"),
+        Err(error) => return Err(error),
+    };
+    match source.test(&name) {
+        Some(test) => {
+            let mut string = String::new();
+            match &source.eval_block(test, &mut context).await {
+                Ok(_) => {}
+                Err(error) => {
+                    let _ = writeln!(string, "{error}");
+                }
+            }
+            let records = context.records();
+            for record in records {
+                let _ = writeln!(string, "{record}");
+            }
+            Ok(string)
+        }
+        None => Err(format!("Test not found: {name}")),
     }
 }

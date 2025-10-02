@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
-import { spawn } from 'child_process';
-import { sep } from 'path';
-import { _eval } from 'lib';
+import { run_test } from 'lib';
 
 export async function activate(context: vscode.ExtensionContext) {
-  // global.console = vscode.window.createOutputChannel('Basjoofan');
-  vscode.window.showInformationMessage(await _eval("1 + 1"));
+  Object.assign(globalThis, {
+    readFileContent: async function (filePath: string): Promise<Uint8Array> {
+      const content = await vscode.workspace.fs.readFile(vscode.Uri.file(filePath));
+      return content;
+    }
+  });
   const ctrl = vscode.tests.createTestController('BasjoofanTestController', 'Basjoofan');
   context.subscriptions.push(ctrl);
 
@@ -81,34 +83,29 @@ export async function activate(context: vscode.ExtensionContext) {
         } else {
           run.started(test);
           const start = Date.now();
-          const result = await new Promise<boolean>(resolve => {
-            const child = spawn('basjoofan', ['test', test.label], { cwd: getWorkspacePath(test.uri) });
-            if (child.pid) {
-              let buffer = '';
-              child.stdout.on('data', data => {
-                const chunk = data.toString();
-                appendOutput(chunk);
-                buffer += chunk;
-              });
-              child.stderr.on('data', data => {
-                const chunk = data.toString();
-                appendOutput(chunk);
-                buffer += chunk;
-              });
-              child.on('close', code => {
-                if (!buffer.match(/.*FAIL.*/) && code === 0) {
-                  resolve(true);
-                } else {
-                  resolve(false);
-                }
-              });
-            } else {
-              run.appendOutput(`Command basjoofan execution failed, please check basjoofan is installed.\r\n`);
-              resolve(false);
+          const workspace = vscode.workspace.getWorkspaceFolder(test.uri!);
+          const files = await vscode.workspace.findFiles(`**/*.fan`);
+          let text = '';
+          for (const file of files) {
+            if (file.fsPath.startsWith(workspace!.uri.fsPath)) {
+              text += await vscode.workspace.openTextDocument(file).then(doc => doc.getText());
             }
+          }
+          const flag = await new Promise<boolean>(resolve => {
+            run_test(text, test.label, workspace!.uri.fsPath).then(result => {
+              appendOutput(result);
+              if (!result.match(/.*FAIL.*/)) {
+                resolve(true);
+              } else {
+                resolve(false);
+              }
+            }).catch(error => {
+              appendOutput(error);
+              resolve(false);
+            });
           });
           const duration = Date.now() - start;
-          if (result) {
+          if (flag) {
             run.passed(test, duration);
           } else {
             run.failed(test, new vscode.TestMessage(`failed ${test.label}`), duration);
@@ -230,15 +227,4 @@ function startWatchingWorkspace(controller: vscode.TestController, fileChangedEm
 
     return watcher;
   });
-}
-
-function getWorkspacePath(uri: vscode.Uri | undefined) {
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  if (workspaceFolders && uri) {
-    for (const workspaceFolder of workspaceFolders) {
-      if (uri.fsPath.startsWith(workspaceFolder.uri.fsPath + sep)) {
-        return workspaceFolder.uri.fsPath;
-      }
-    }
-  }
 }
