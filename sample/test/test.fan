@@ -47,10 +47,12 @@ test post {
 
 test postForm {
     let response = postForm->;
-    response.status
+    let status = response.status
+    println("status: {status}")
 }
 
 test postMultipart {
     let response = postMultipart->;
-    response
+    let body = response.body
+    println("body: {body}")
 }

@@ -1,4 +1,4 @@
-# Basjoofan for Visual Studio Code
+# Basjoofan For Visual Studio Code
 
 This extension provides support for the [Basjoofan](https://basjoofan.com).
 
@@ -16,8 +16,7 @@ Welcome! 👋🏻<br/>
 Whether you are new to Basjoofan or an experienced Basjoofan developer, we hope this
 extension fits your needs and enhances your development experience.
 
-1. Install [Basjoofan](https://basjoofan.com) latest version if you haven't already.
-2. Install the [VS Code Basjoofan extension](https://marketplace.visualstudio.com/items?itemName=basjoofan.vscode).
+Install the [VS Code Basjoofan extension](https://marketplace.visualstudio.com/items?itemName=basjoofan.vscode).
 
 You are ready to Basjoofan :-) &nbsp;&nbsp; 🎉🎉🎉
 

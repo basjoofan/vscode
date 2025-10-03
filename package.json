@@ -1,12 +1,12 @@
 {
   "name": "basjoofan",
   "displayName": "Basjoofan",
-  "description": "Basjoofan support for Visual Studio Code.",
-  "version": "0.0.1",
+  "description": "Basjoofan For Visual Studio Code.",
+  "version": "0.1.0",
   "publisher": "basjoofan",
   "private": true,
   "icon": "icons/icon.png",
-  "license": "MIT OR Apache-2.0",
+  "license": "MIT",
   "repository": "https://github.com/basjoofan/vscode",
   "engines": {
     "vscode": "^1.68.0"
@@ -24,12 +24,13 @@
     "workspaceContains:*.fan"
   ],
   "main": "out/extension.js",
+  "browser": "out/extension.js",
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "lint": "eslint \"src/**/*.ts\"",
     "watch": "tsc -watch -p ./",
-    "wasm:pack": "wasm-pack build --target nodejs --out-dir ./node_modules/lib",
+    "wasm:pack": "wasm-pack build --target nodejs --out-dir ./node_modules/lib --release",
     "package": "vsce package"
   },
   "devDependencies": {
@@ -52,7 +53,7 @@
         "extensions": [
           ".fan"
         ],
-        "configuration": "language-configuration.json",
+        "configuration": "language/configuration.json",
         "icon": {
           "light": "icons/file.png",
           "dark": "icons/file.png"
@@ -63,7 +64,7 @@
       {
         "language": "basjoofan",
         "scopeName": "source",
-        "path": "syntaxes/language.json"
+        "path": "language/syntaxes.json"
       }
     ]
   }

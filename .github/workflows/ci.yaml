@@ -12,14 +12,31 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 18.x
+          node-version: 22
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+            !./target/*/*/*.zip
+            !./target/*/*/*.tar.gz
+          key: cargo-${{ hashFiles('**/Cargo.toml') }}
+      - name: Update Rust Toolchain
+        run: |
+          rustup update stable
+          rustup component add rustfmt rust-src clippy
+          rustup target add aarch64-apple-darwin
+          rustup target add wasm32-unknown-unknown
+          cargo install wasm-pack --force
       - name: Install Dependencies
         run: npm install
-      - name: Package Extension
       - name: Wasm Package
         run: npm run wasm:pack
       - name: Package Extension

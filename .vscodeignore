@@ -1,5 +1,9 @@
 .vscode/**
 .vscode-test/**
 .gitignore
+.github
 vsc-extension-quickstart.md
 sample
+target
+debug
+Cargo.lock

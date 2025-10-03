@@ -2,10 +2,9 @@ import * as vscode from 'vscode';
 import { run_test } from 'lib';
 
 export async function activate(context: vscode.ExtensionContext) {
-  Object.assign(globalThis, {
+  Object.assign(global, {
     readFileContent: async function (filePath: string): Promise<Uint8Array> {
-      const content = await vscode.workspace.fs.readFile(vscode.Uri.file(filePath));
-      return content;
+      return await vscode.workspace.fs.readFile(vscode.Uri.file(filePath));
     }
   });
   const ctrl = vscode.tests.createTestController('BasjoofanTestController', 'Basjoofan');
@@ -65,19 +64,9 @@ export async function activate(context: vscode.ExtensionContext) {
       }
     };
 
-    const appendOutput = (chunk: string) => {
-      for (; ;) {
-        const index = chunk.indexOf('\n');
-        if (index === -1) break;
-        const line = chunk.substring(0, index);
-        chunk = chunk.substring(index + 1);
-        run.appendOutput(`${line}\r\n`);
-      }
-    };
-
     const runTestQueue = async () => {
       for (const test of queue) {
-        run.appendOutput(`Running ${test.uri} ${test.label}\r\n`);
+        run.appendOutput(`Running ${test.uri} ${test.label}\r\n`, undefined, test);
         if (run.token.isCancellationRequested) {
           run.skipped(test);
         } else {
@@ -91,6 +80,16 @@ export async function activate(context: vscode.ExtensionContext) {
               text += await vscode.workspace.openTextDocument(file).then(doc => doc.getText());
             }
           }
+          const appendOutput = (chunk: string): void => {
+            for (; ;) {
+              const index = chunk.indexOf('\n');
+              if (index === -1) break;
+              const line = chunk.substring(0, index);
+              chunk = chunk.substring(index + 1);
+              run.appendOutput(`${line}\r\n`, undefined, test);
+            }
+          };
+          Object.assign(global, { appendOutput: appendOutput });
           const flag = await new Promise<boolean>(resolve => {
             run_test(text, test.label, workspace!.uri.fsPath).then(result => {
               appendOutput(result);

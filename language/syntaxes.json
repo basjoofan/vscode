@@ -1,5 +1,5 @@
 {
-  "name": "Basjoofan",
+  "name": "basjoofan",
   "scopeName": "source",
   "patterns": [
     {
@@ -23,7 +23,7 @@
       "patterns": [
         {
           "name": "keyword.control",
-          "match": "\\b(fn|rq|let|if|else|return|while|for)\\b"
+          "match": "\\b(test|fn|rq|let|if|else|return|while|for)\\b"
         }
       ]
     },
