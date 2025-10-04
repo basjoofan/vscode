@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { run_test } from 'lib';
+import * as lib from 'lib';
 
 export async function activate(context: vscode.ExtensionContext) {
   Object.assign(global, {
@@ -73,10 +73,11 @@ export async function activate(context: vscode.ExtensionContext) {
           run.started(test);
           const start = Date.now();
           const workspace = vscode.workspace.getWorkspaceFolder(test.uri!);
+          const workspacePath = workspace!.uri.fsPath;
           const files = await vscode.workspace.findFiles(`**/*.fan`);
           let text = '';
           for (const file of files) {
-            if (file.fsPath.startsWith(workspace!.uri.fsPath)) {
+            if (file.fsPath.startsWith(workspacePath)) {
               text += await vscode.workspace.openTextDocument(file).then(doc => doc.getText());
             }
           }
@@ -91,14 +92,14 @@ export async function activate(context: vscode.ExtensionContext) {
           };
           Object.assign(global, { appendOutput: appendOutput });
           const flag = await new Promise<boolean>(resolve => {
-            run_test(text, test.label, workspace!.uri.fsPath).then(result => {
+            lib.run_test(text, test.label, workspacePath).then((result: string) => {
               appendOutput(result);
               if (!result.match(/.*FAIL.*/)) {
                 resolve(true);
               } else {
                 resolve(false);
               }
-            }).catch(error => {
+            }).catch((error: string) => {
               appendOutput(error);
               resolve(false);
             });
